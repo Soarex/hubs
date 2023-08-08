@@ -649,6 +649,8 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
         .catch(connectError => {
           onConnectionError(entryManager, connectError);
         });
+
+      injectScripts();
     };
 
     window.APP.hub = hub;
@@ -666,6 +668,37 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
           hubChannel.allowNAFTraffic(true);
           remountUI({ showPreload: false });
           loadEnvironmentAndConnect();
+        }
+      });
+    }
+
+    function injectScripts(){
+      console.log('Starting script injection for hub: ' + hub.hub_id);
+      //get the current hub_id and construct a url
+      const myHub = hub.hub_id;
+      const url = "http://localhost:3000/injectScripts?hubid="+ myHub;
+
+      //fetch the url with a get method which will return scripts to inject
+      fetch(url, {
+        method: 'get'
+      })
+        .then(function(body){
+          return body.text();
+        }).then(function(data) {
+        var myUrls = data.split(",");
+        var myBody = document.querySelector("body");
+        for(var items of myUrls) {
+          console.log('Injecting script: ' + items);
+          if(items == "noUrls") {
+            break;
+          }
+          //inject some scripts based on the returned array of urls
+          var newScript = document.createElement("script");
+          newScript.type = 'text/javascript';
+          var srcAt = document.createAttribute('src');
+          srcAt.value = items;
+          newScript.setAttributeNode(srcAt);
+          myBody.appendChild(newScript);
         }
       });
     }
