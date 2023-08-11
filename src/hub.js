@@ -186,7 +186,7 @@ import MediaDevicesManager from "./utils/media-devices-manager";
 import PinningHelper from "./utils/pinning-helper";
 import { sleep } from "./utils/async-utils";
 import { platformUnsupported } from "./support";
-import { renderAsEntity } from "./utils/jsx-entity";
+import { addObject3DComponent, renderAsEntity } from "./utils/jsx-entity";
 import { VideoMenuPrefab } from "./prefabs/video-menu";
 import { ObjectMenuPrefab } from "./prefabs/object-menu";
 import { preload } from "./utils/preload";
@@ -256,6 +256,9 @@ import { swapActiveScene } from "./bit-systems/scene-loading";
 import { setLocalClientID } from "./bit-systems/networking";
 import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
+import { inflateTestComponent } from "./components/test-component";
+import { addEntity } from "bitecs";
+import { BoxGeometry, Mesh, MeshBasicMaterial } from "three";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -1426,4 +1429,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   authChannel.setSocket(socket);
   linkChannel.setSocket(socket);
+});
+
+document.addEventListener('keydown', function(event) {
+  if(event.key === 'y') {
+    console.log("Adding Test");
+
+      getScene().then(scene => {
+          const eid = addEntity(APP.world);
+          inflateTestComponent(APP.world, eid, {
+              y: 0.05
+          });
+
+          addObject3DComponent(APP.world, eid, new Mesh(
+              new BoxGeometry(1, 1, 1),
+              new MeshBasicMaterial({color: 0x00ff33})
+          ));
+
+          const obj = APP.world.eid2obj.get(eid);
+
+        scene.add(obj);
+      });
+  }
 });

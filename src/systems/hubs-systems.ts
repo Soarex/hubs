@@ -60,6 +60,9 @@ import { sceneLoadingSystem } from "../bit-systems/scene-loading";
 import { networkDebugSystem } from "../bit-systems/network-debug";
 import qsTruthy from "../utils/qs_truthy";
 
+// custom systems
+import { TestSystem } from "../bit-systems/test-system";
+
 declare global {
   interface Window {
     $S: HubsSystems;
@@ -228,6 +231,9 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.audioZonesSystem.tick(hubsSystems.el);
   hubsSystems.gainSystem.tick();
   hubsSystems.nameTagSystem.tick();
+
+  // Custom systems
+  TestSystem(world);
 
   deleteEntitySystem(world, aframeSystems.userinput);
   destroyAtExtremeDistanceSystem(world);
