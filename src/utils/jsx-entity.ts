@@ -52,6 +52,7 @@ import { MediaLoaderParams } from "../inflators/media-loader";
 import { preload } from "./preload";
 import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/directional-light";
 import { ProjectionMode } from "./projection-mode";
+import { inflateTestComponent, TestComponent, TestComponentParams } from "../components/test-component";
 
 preload(
   new Promise(resolve => {
@@ -197,6 +198,10 @@ interface InflatorFn {
 export interface ComponentData {
   directionalLight?: DirectionalLightParams;
   grabbable?: GrabbableParams;
+
+  // Custom components
+  test?: TestComponentParams;
+  //
 }
 
 export interface JSXComponentData extends ComponentData {
@@ -315,7 +320,11 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   grabbable: inflateGrabbable,
 
   // inflators that create Object3Ds
-  directionalLight: inflateDirectionalLight
+  directionalLight: inflateDirectionalLight,
+
+  // Custom inflators
+  test: inflateTestComponent,
+  //
 };
 
 const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
@@ -357,7 +366,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   text: inflateText,
   model: inflateModel,
   image: inflateImage,
-  video: inflateVideo
+  video: inflateVideo,
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {

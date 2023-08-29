@@ -1,5 +1,7 @@
 import { addComponent, defineComponent, Types } from "bitecs";
 import { HubsWorld } from "../app";
+import { addObject3DComponent } from "../utils/jsx-entity";
+import { BoxGeometry, Mesh, MeshBasicMaterial } from "three";
 
 export const TestComponent = defineComponent({
   x: Types.f32,
@@ -29,4 +31,9 @@ export function inflateTestComponent(
   TestComponent.x[eid] = params.x ?? DEFAULTS.x;
   TestComponent.y[eid] = params.y ?? DEFAULTS.y;
   TestComponent.z[eid] = params.z ?? DEFAULTS.z;
+
+  addObject3DComponent(APP.world, eid, new Mesh(
+      new BoxGeometry(1, 1, 1),
+      new MeshBasicMaterial({color: 0x00ff33})
+  ));
 }

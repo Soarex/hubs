@@ -259,6 +259,8 @@ import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
 import { inflateTestComponent } from "./components/test-component";
 import { addEntity } from "bitecs";
 import { BoxGeometry, Mesh, MeshBasicMaterial } from "three";
+import { TestPrefab } from "./prefabs/test-prefab";
+//import { TestPrefab } from "./prefabs/test-prefab";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
 NAF.options.firstSyncSource = PHOENIX_RELIABLE_NAF;
@@ -653,7 +655,7 @@ function handleHubChannelJoined(entryManager, hubChannel, messageDispatch, data)
           onConnectionError(entryManager, connectError);
         });
 
-      injectScripts();
+      //injectScripts();
     };
 
     window.APP.hub = hub;
@@ -1436,17 +1438,8 @@ document.addEventListener('keydown', function(event) {
     console.log("Adding Test");
 
       getScene().then(scene => {
-          const eid = addEntity(APP.world);
-          inflateTestComponent(APP.world, eid, {
-              y: 0.05
-          });
-
-          addObject3DComponent(APP.world, eid, new Mesh(
-              new BoxGeometry(1, 1, 1),
-              new MeshBasicMaterial({color: 0x00ff33})
-          ));
-
-          const obj = APP.world.eid2obj.get(eid);
+        const eid = renderAsEntity(APP.world, TestPrefab({y: 0.05}));
+        const obj = APP.world.eid2obj.get(eid);
 
         scene.add(obj);
       });
