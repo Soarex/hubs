@@ -200,7 +200,7 @@ export interface ComponentData {
   grabbable?: GrabbableParams;
 
   // Custom components
-  test?: HyperbeamPageParams;
+  hyperbeamPage?: HyperbeamPageParams;
   //
 }
 
@@ -323,7 +323,7 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   directionalLight: inflateDirectionalLight,
 
   // Custom inflators
-  test: inflateHyperbeamPage,
+  hyperbeamPage: inflateHyperbeamPage,
   //
 };
 

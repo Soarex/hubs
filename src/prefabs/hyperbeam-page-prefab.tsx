@@ -7,7 +7,7 @@ import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
 export function HyperbeamPagePrefab(params: HyperbeamPageParams) {
     return (
         <entity
-            test={params}
+            hyperbeamPage={params}
             cursorRaycastable
             remoteHoverTarget
             holdable

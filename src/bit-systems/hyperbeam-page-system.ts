@@ -33,13 +33,13 @@ async function GetHyperbeamObject() {
     const texture = new THREE.Texture();
     texture.flipY = true;
     texture.generateMipmaps = false;
-
+    
     const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: false })
     renderer.setPixelRatio(window.devicePixelRatio)
     renderer.setClearColor(0xFF889B, 1)
     renderer.setSize(window.innerWidth, window.innerHeight)
 
-    const hbContainer = document.getElementById("hb-container") as HTMLDivElement
+    const hbContainer = document.createElement('div');
     console.log(`Connecting to: ${embedURL}`);
 
     const hb = await Hyperbeam(hbContainer, embedURL, {
