@@ -256,10 +256,10 @@ import { swapActiveScene } from "./bit-systems/scene-loading";
 import { setLocalClientID } from "./bit-systems/networking";
 import { listenForNetworkMessages } from "./utils/listen-for-network-messages";
 import { exposeBitECSDebugHelpers } from "./bitecs-debug-helpers";
-import { inflateTestComponent } from "./components/test-component";
+import { inflateHyperbeamPage } from "./components/hyperbeam-page";
 import { addEntity } from "bitecs";
 import { BoxGeometry, Mesh, MeshBasicMaterial } from "three";
-import { TestPrefab } from "./prefabs/test-prefab";
+import { HyperbeamPagePrefab } from "./prefabs/hyperbeam-page-prefab";
 //import { TestPrefab } from "./prefabs/test-prefab";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
@@ -1438,7 +1438,7 @@ document.addEventListener('keydown', function(event) {
     console.log("Adding Test");
 
       getScene().then(scene => {
-        const eid = renderAsEntity(APP.world, TestPrefab({y: 0.05}));
+        const eid = renderAsEntity(APP.world, HyperbeamPagePrefab({y: 0.05}));
         const obj = APP.world.eid2obj.get(eid);
 
         scene.add(obj);

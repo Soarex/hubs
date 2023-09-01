@@ -1,10 +1,10 @@
 /** @jsx createElementEntity */
 import { createElementEntity } from "../utils/jsx-entity";
-import { TestComponentParams } from "../components/test-component";
+import { HyperbeamPageParams } from "../components/hyperbeam-page";
 import { COLLISION_LAYERS } from "../constants";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
 
-export function TestPrefab(params: TestComponentParams) {
+export function HyperbeamPagePrefab(params: HyperbeamPageParams) {
     return (
         <entity
             test={params}

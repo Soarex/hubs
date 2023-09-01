@@ -61,7 +61,7 @@ import { networkDebugSystem } from "../bit-systems/network-debug";
 import qsTruthy from "../utils/qs_truthy";
 
 // custom systems
-import { TestSystem } from "../bit-systems/test-system";
+import { HyperbeamPageSystem } from "../bit-systems/hyperbeam-page-system";
 
 declare global {
   interface Window {
@@ -233,7 +233,7 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   hubsSystems.nameTagSystem.tick();
 
   // Custom systems
-  TestSystem(world);
+  HyperbeamPageSystem(world);
 
   deleteEntitySystem(world, aframeSystems.userinput);
   destroyAtExtremeDistanceSystem(world);

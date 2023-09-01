@@ -52,7 +52,7 @@ import { MediaLoaderParams } from "../inflators/media-loader";
 import { preload } from "./preload";
 import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/directional-light";
 import { ProjectionMode } from "./projection-mode";
-import { inflateTestComponent, TestComponent, TestComponentParams } from "../components/test-component";
+import { inflateHyperbeamPage, HyperbeamPage, HyperbeamPageParams } from "../components/hyperbeam-page";
 
 preload(
   new Promise(resolve => {
@@ -200,7 +200,7 @@ export interface ComponentData {
   grabbable?: GrabbableParams;
 
   // Custom components
-  test?: TestComponentParams;
+  test?: HyperbeamPageParams;
   //
 }
 
@@ -323,7 +323,7 @@ export const commonInflators: Required<{ [K in keyof ComponentData]: InflatorFn 
   directionalLight: inflateDirectionalLight,
 
   // Custom inflators
-  test: inflateTestComponent,
+  test: inflateHyperbeamPage,
   //
 };
 
