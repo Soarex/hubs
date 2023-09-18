@@ -7,13 +7,17 @@ import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
 export function HyperbeamPagePrefab(params: HyperbeamPageParams) {
     return (
         <entity
+            name="Hyperbeam Page"
             hyperbeamPage={params}
             cursorRaycastable
             remoteHoverTarget
-            holdable
-            holdableButton
             grabbable={{cursor: true, hand: true}}
             deletable
+            destroyAtExtremeDistance
+            floatyObject={{
+                flags: FLOATY_OBJECT_FLAGS.MODIFY_GRAVITY_ON_RELEASE,
+                releaseGravity: 0
+            }}
             rigidbody={{ collisionGroup: COLLISION_LAYERS.INTERACTABLES, collisionMask: COLLISION_LAYERS.HANDS }}
         />
     );

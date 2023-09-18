@@ -6,6 +6,8 @@ import * as THREE from "three";
 
 export const HyperbeamPage = defineComponent({
   hyperbeamObjectId: Types.i16,
+  width: Types.f32,
+  height: Types.f32
 });
 
 export type HyperbeamPageParams = {
@@ -25,6 +27,9 @@ export function inflateHyperbeamPage(
   const geometry = new PlaneGeometry(width, height);
   geometry.rotateZ(Math.PI);
   geometry.rotateY(Math.PI);
+
+  HyperbeamPage.width[eid] = width;
+  HyperbeamPage.height[eid] = height;
 
   const material = new THREE.MeshBasicMaterial({side: THREE.DoubleSide});
   const mesh = new Mesh(
