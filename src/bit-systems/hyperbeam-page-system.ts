@@ -5,10 +5,14 @@ import { getScene, HubsWorld } from "../app";
 import * as THREE from "three"
 import Hyperbeam, { HyperbeamEmbed, MouseEvent } from "@hyperbeam/web";
 
+export type HyperbeamObject = {
+    texture: THREE.Texture
+    hyperbeamEmbed: HyperbeamEmbed
+}
 
 const hyperbeamPageQuery = defineQuery([HyperbeamPage, Object3DTag]);
 
-const hyperbeamObjectMap = new Map();
+const hyperbeamObjectMap = new Map<number, HyperbeamObject>();
 let latestHyperbeamObjectId = 1;
 
 const raycaster = new THREE.Raycaster();
@@ -17,10 +21,22 @@ let latestPointerButton = 0
 let latestPointerEvent : "mousedown" | "mousemove" | "mouseup" | null = null
 let latestWheelDelta = 0.0
 
+let controlKeyPressed = false
+
 window.addEventListener("wheel", (e) => handleWheelEvent(e))
 window.addEventListener("pointermove", (e) => handlePointerEvent(e, "mousemove"))
 window.addEventListener("pointerup", (e) =>   handlePointerEvent(e, "mouseup"))
 window.addEventListener("pointerdown", (e) => handlePointerEvent(e, "mousedown"))
+
+document.addEventListener('keydown', function(event) {
+    if (event.ctrlKey)
+        controlKeyPressed = true
+})
+
+document.addEventListener('keyup', function(event) {
+    if (!event.ctrlKey)
+        controlKeyPressed = false
+})
 
 async function getUrl() {
     let embedURL = "" // Running locally and you have an embed URL? Set it here
@@ -61,7 +77,9 @@ async function getHyperbeamObject() {
         audioTrackCb: (track) => {}
     })
 
-    return { texture: texture, hyperbeamEmbed: hb};
+    const res : HyperbeamObject = { texture: texture, hyperbeamEmbed: hb }
+
+    return res;
 }
 
 function handlePointerEvent(e: PointerEvent, type: "mousedown" | "mousemove" | "mouseup") {
@@ -101,7 +119,7 @@ function processEvents(entityId: number, hyperbeamPlane: THREE.Mesh) {
     //@ts-ignore
     const camera = document.getElementById("viewing-camera").getObject3D("camera")
 
-    const hyperbeamObject = hyperbeamObjectMap.get(HyperbeamPage.hyperbeamObjectId[entityId])
+    const hyperbeamObject = hyperbeamObjectMap.get(HyperbeamPage.hyperbeamObjectId[entityId])!
     const hyperbeamPageWidth = HyperbeamPage.width[entityId]
     const hyperbeamPageHeight = HyperbeamPage.height[entityId]
 
@@ -120,6 +138,17 @@ function processEvents(entityId: number, hyperbeamPlane: THREE.Mesh) {
             type: "wheel",
             deltaY: latestWheelDelta
         })
+
+        if (latestPointerEvent === "mousedown")
+            addComponent(APP.world, Focused, entityId)
+
+        if (controlKeyPressed)
+            addComponent(APP.world, Pinned, entityId)
+        else
+            removeComponent(APP.world, Pinned, entityId)
+
+    } else if (latestPointerEvent === "mousedown") {
+            removeComponent(APP.world, Focused, entityId)
     }
 }
 function resetInputs() {
