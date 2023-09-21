@@ -3,6 +3,7 @@ import { createElementEntity } from "../utils/jsx-entity";
 import { HyperbeamPageParams } from "../components/hyperbeam-page";
 import { COLLISION_LAYERS } from "../constants";
 import { FLOATY_OBJECT_FLAGS } from "../systems/floaty-object-system";
+import { prefabs } from "./prefabs";
 
 export function HyperbeamPagePrefab(params: HyperbeamPageParams) {
     return (
@@ -11,6 +12,8 @@ export function HyperbeamPagePrefab(params: HyperbeamPageParams) {
             hyperbeamPage={params}
             cursorRaycastable
             remoteHoverTarget
+            networked
+            networkedTransform
             grabbable={{cursor: true, hand: true}}
             deletable
             destroyAtExtremeDistance

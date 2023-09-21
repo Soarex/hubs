@@ -1,7 +1,7 @@
-import { defineQuery } from "bitecs";
-import { Object3DTag } from "../bit-components";
-import { HyperbeamPage } from "../components/hyperbeam-page";
-import { HubsWorld } from "../app";
+import { addComponent, defineQuery, removeComponent } from "bitecs";
+import { Object3DTag, Pinned } from "../bit-components";
+import { Focused, HyperbeamPage } from "../components/hyperbeam-page";
+import { getScene, HubsWorld } from "../app";
 import * as THREE from "three"
 import Hyperbeam, { HyperbeamEmbed, MouseEvent } from "@hyperbeam/web";
 
@@ -13,6 +13,14 @@ let latestHyperbeamObjectId = 1;
 
 const raycaster = new THREE.Raycaster();
 let latestPointerPosition = {x: 0, y: 0}
+let latestPointerButton = 0
+let latestPointerEvent : "mousedown" | "mousemove" | "mouseup" | null = null
+let latestWheelDelta = 0.0
+
+window.addEventListener("wheel", (e) => handleWheelEvent(e))
+window.addEventListener("pointermove", (e) => handlePointerEvent(e, "mousemove"))
+window.addEventListener("pointerup", (e) =>   handlePointerEvent(e, "mouseup"))
+window.addEventListener("pointerdown", (e) => handlePointerEvent(e, "mousedown"))
 
 async function getUrl() {
     let embedURL = "" // Running locally and you have an embed URL? Set it here
@@ -30,7 +38,6 @@ async function getUrl() {
         return body.url
     }
 }
-
 async function getHyperbeamObject() {
     const embedURL = await getUrl();
 
@@ -57,85 +64,90 @@ async function getHyperbeamObject() {
     return { texture: texture, hyperbeamEmbed: hb};
 }
 
-function getPlaneIntersects(pointer: { x: number, y: number }, object: THREE.Object3D) {
-    //@ts-ignore
-    const camera = document.getElementById("viewing-camera").getObject3D("camera");
+function handlePointerEvent(e: PointerEvent, type: "mousedown" | "mousemove" | "mouseup") {
+    const canvasRect = document.querySelector(".a-canvas")?.getBoundingClientRect()
 
-    raycaster.setFromCamera(pointer, camera)
-    return raycaster.intersectObject(object, false)
-}
-
-function processPointerEvent(e: PointerEvent, type: "mousedown" | "mousemove" | "mouseup", obj: THREE.Object3D, hb: HyperbeamEmbed, width: number, height: number) {
-    const canvas = document.querySelector(".a-canvas") as HTMLCanvasElement
+    if(canvasRect == null)
+        return
 
     latestPointerPosition = {
-          x: (e.clientX / canvas.width) * 2 - 1,
-          y: -(e.clientY / canvas.height) * 2 + 1
+        x: (e.clientX / canvasRect.width) * 2 - 1,
+        y: -(e.clientY / canvasRect.height) * 2 + 1
     }
 
-    //@ts-ignore
-    const camera = document.getElementById("viewing-camera").getObject3D("camera");
+    latestPointerButton = e.button
 
+    latestPointerEvent = type
+}
+function handleWheelEvent(e: WheelEvent) {
+    latestWheelDelta = e.deltaY
+}
+
+function getIntersectionPoint(obj: THREE.Object3D, camera: THREE.Camera, localSpace = true) {
     raycaster.setFromCamera(latestPointerPosition, camera)
-    const intersects = raycaster.intersectObject(obj, false)
+    const intersections = raycaster.intersectObject(obj, false)
 
-    if (intersects.length > 0) {
-        const vector = new THREE.Vector3().copy(intersects[0].point)
+    if(intersections.length == 0)
+        return null
 
-        obj.worldToLocal(vector)
+    const intersectionPoint = new THREE.Vector3().copy(intersections[0].point)
 
-        hb.sendEvent({
-            type: type,
-            x: vector.x / width + 0.5,
-            y: -vector.y / height + 0.5,
-            button: e.button
+    if(localSpace)
+        obj.worldToLocal(intersectionPoint)
+
+    return intersectionPoint
+}
+function processEvents(entityId: number, hyperbeamPlane: THREE.Mesh) {
+    //@ts-ignore
+    const camera = document.getElementById("viewing-camera").getObject3D("camera")
+
+    const hyperbeamObject = hyperbeamObjectMap.get(HyperbeamPage.hyperbeamObjectId[entityId])
+    const hyperbeamPageWidth = HyperbeamPage.width[entityId]
+    const hyperbeamPageHeight = HyperbeamPage.height[entityId]
+
+    let point
+    if ((point = getIntersectionPoint(hyperbeamPlane, camera)) != null) {
+        if(latestPointerEvent != null) {
+            hyperbeamObject.hyperbeamEmbed.sendEvent({
+                type: latestPointerEvent,
+                x: point.x / hyperbeamPageWidth + 0.5,
+                y: -point.y / hyperbeamPageHeight + 0.5,
+                button: latestPointerButton
+            })
+        }
+
+        hyperbeamObject.hyperbeamEmbed.sendEvent({
+            type: "wheel",
+            deltaY: latestWheelDelta
         })
     }
 }
-
-function processWheelEvent(e: WheelEvent, obj: THREE.Object3D, hb: HyperbeamEmbed) {
-    //@ts-ignore
-    const camera = document.getElementById("viewing-camera").getObject3D("camera");
-
-    raycaster.setFromCamera(latestPointerPosition, camera)
-    const intersects = raycaster.intersectObject(obj, false)
-
-    if (intersects.length > 0) {
-        const vector = new THREE.Vector3().copy(intersects[0].point)
-
-        obj.worldToLocal(vector)
-
-        hb.sendEvent({
-            type: "wheel",
-            deltaY: e.deltaY
-        })
-    }
+function resetInputs() {
+    latestWheelDelta = 0
+    latestPointerButton = 0
+    latestPointerEvent = null
 }
 
 export function HyperbeamPageSystem(world: HubsWorld) {
-  hyperbeamPageQuery(world).forEach(eid => {
-      const obj = world.eid2obj.get(eid)! as THREE.Mesh;
+    hyperbeamPageQuery(world).forEach(eid => {
+        const obj = world.eid2obj.get(eid)! as THREE.Mesh;
 
-      if(HyperbeamPage.hyperbeamObjectId[eid] == 0) {
-          HyperbeamPage.hyperbeamObjectId[eid] = -1;
+        if(HyperbeamPage.hyperbeamObjectId[eid] == 0) {
+            HyperbeamPage.hyperbeamObjectId[eid] = -1;
 
-          getHyperbeamObject().then(hyperbeamObject => {
-              HyperbeamPage.hyperbeamObjectId[eid] = latestHyperbeamObjectId++;
-              hyperbeamObjectMap.set(HyperbeamPage.hyperbeamObjectId[eid], hyperbeamObject);
+            getHyperbeamObject().then(hyperbeamObject => {
+                HyperbeamPage.hyperbeamObjectId[eid] = latestHyperbeamObjectId++;
+                hyperbeamObjectMap.set(HyperbeamPage.hyperbeamObjectId[eid], hyperbeamObject);
 
-              obj.material = new THREE.MeshBasicMaterial({map: hyperbeamObject.texture ,side: THREE.DoubleSide});
+                obj.material = new THREE.MeshBasicMaterial({map: hyperbeamObject.texture ,side: THREE.DoubleSide});
+            });
+        }
 
-              window.addEventListener("wheel", (e) => processWheelEvent(e, obj, hyperbeamObject.hyperbeamEmbed))
-              window.addEventListener("pointermove", (e) => processPointerEvent(e, "mousemove", obj, hyperbeamObject.hyperbeamEmbed, HyperbeamPage.width[eid], HyperbeamPage.height[eid]))
-              window.addEventListener("pointerup", (e) =>   processPointerEvent(e, "mouseup",   obj, hyperbeamObject.hyperbeamEmbed, HyperbeamPage.width[eid], HyperbeamPage.height[eid]))
-              window.addEventListener("pointerdown", (e) => processPointerEvent(e, "mousedown", obj, hyperbeamObject.hyperbeamEmbed, HyperbeamPage.width[eid], HyperbeamPage.height[eid]))
-          });
-      }
+        if(HyperbeamPage.hyperbeamObjectId[eid] <= 0)
+            return;
 
-      if(HyperbeamPage.hyperbeamObjectId[eid] <= 0)
-          return;
+        processEvents(eid, obj)
+    })
 
-      const hyperbeamObject = hyperbeamObjectMap.get(HyperbeamPage.hyperbeamObjectId[eid]);
-      obj.material = new THREE.MeshBasicMaterial({map: hyperbeamObject.texture ,side: THREE.DoubleSide});
-  });
+    resetInputs()
 }

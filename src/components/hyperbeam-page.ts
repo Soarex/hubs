@@ -10,6 +10,8 @@ export const HyperbeamPage = defineComponent({
   height: Types.f32
 });
 
+export const Focused = defineComponent();
+
 export type HyperbeamPageParams = {
 };
 

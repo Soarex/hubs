@@ -52,7 +52,7 @@ import { MediaLoaderParams } from "../inflators/media-loader";
 import { preload } from "./preload";
 import { DirectionalLightParams, inflateDirectionalLight } from "../inflators/directional-light";
 import { ProjectionMode } from "./projection-mode";
-import { inflateHyperbeamPage, HyperbeamPage, HyperbeamPageParams } from "../components/hyperbeam-page";
+import { inflateHyperbeamPage, HyperbeamPage, HyperbeamPageParams, Focused } from "../components/hyperbeam-page";
 
 preload(
   new Promise(resolve => {
@@ -241,6 +241,7 @@ export interface JSXComponentData extends ComponentData {
   singleActionButton?: true;
   holdableButton?: true;
   holdable?: true;
+  focused?: true;
   deletable?: true;
   makeKinematicOnRelease?: true;
   destroyAtExtremeDistance?: true;
@@ -340,6 +341,7 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   textButton: createDefaultInflator(TextButton),
   hoverButton: createDefaultInflator(HoverButton),
   holdable: createDefaultInflator(Holdable),
+  focused: createDefaultInflator(Focused),
   deletable: createDefaultInflator(Deletable),
   rigidbody: createDefaultInflator(Rigidbody),
   physicsShape: createDefaultInflator(PhysicsShape),

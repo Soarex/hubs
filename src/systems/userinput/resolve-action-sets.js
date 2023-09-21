@@ -22,6 +22,7 @@ import {
   MediaVideo
 } from "../../bit-components";
 import { hasComponent } from "bitecs";
+import { Focused, HyperbeamPage } from "../../components/hyperbeam-page";
 const debugUserInput = qsTruthy("dui");
 
 let leftTeleporter, rightTeleporter;
@@ -56,6 +57,8 @@ export function resolveActionSets() {
   const rightHandHolding = anyEntityWith(world, HeldHandRight);
   const rightRemoteHovering = anyEntityWith(world, HoveredRemoteRight);
   const rightRemoteHolding = anyEntityWith(world, HeldRemoteRight);
+
+  const hyperbeamFocused = hc(world, Focused, anyEntityWith(world, HyperbeamPage))
 
   userinput.toggleSet(sets.leftHandHoldingInteractable, leftHandHolding);
   userinput.toggleSet(sets.rightHandHoldingInteractable, rightHandHolding);
@@ -139,7 +142,8 @@ export function resolveActionSets() {
     sets.inputFocused,
     document.activeElement.nodeName === "INPUT" ||
       document.activeElement.nodeName === "TEXTAREA" ||
-      document.activeElement.contentEditable === "true"
+      document.activeElement.contentEditable === "true" ||
+      hyperbeamFocused
   );
 
   userinput.toggleSet(sets.debugUserInput, debugUserInput);

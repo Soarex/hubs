@@ -260,6 +260,7 @@ import { inflateHyperbeamPage } from "./components/hyperbeam-page";
 import { addEntity } from "bitecs";
 import { BoxGeometry, Mesh, MeshBasicMaterial } from "three";
 import { HyperbeamPagePrefab } from "./prefabs/hyperbeam-page-prefab";
+import { createNetworkedEntity } from "./utils/create-networked-entity";
 //import { TestPrefab } from "./prefabs/test-prefab";
 
 const PHOENIX_RELIABLE_NAF = "phx-reliable";
@@ -1438,7 +1439,7 @@ document.addEventListener('keydown', function(event) {
     console.log("Adding Test");
 
       getScene().then(scene => {
-        const eid = renderAsEntity(APP.world, HyperbeamPagePrefab({y: 0.05}));
+        const eid = createNetworkedEntity(APP.world, "hyperbeam-page", {y: 0.05})//renderAsEntity(APP.world, HyperbeamPagePrefab({y: 0.05}));
         const obj = APP.world.eid2obj.get(eid);
 
         scene.add(obj);
