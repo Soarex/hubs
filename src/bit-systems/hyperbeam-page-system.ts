@@ -1,13 +1,19 @@
 import { addComponent, defineQuery, removeComponent } from "bitecs";
 import { Object3DTag, Pinned } from "../bit-components";
 import { Focused, HyperbeamPage } from "../components/hyperbeam-page";
-import { getScene, HubsWorld } from "../app";
+import { HubsWorld } from "../app";
 import * as THREE from "three"
-import Hyperbeam, { HyperbeamEmbed, MouseEvent } from "@hyperbeam/web";
+import Hyperbeam, { HyperbeamEmbed } from "@hyperbeam/web";
 
 export type HyperbeamObject = {
     texture: THREE.Texture
     hyperbeamEmbed: HyperbeamEmbed
+}
+
+type Event = {
+    type: "mousedown" | "mousemove" | "mouseup"
+    position: { x: number, y: number }
+    button: number
 }
 
 const hyperbeamPageQuery = defineQuery([HyperbeamPage, Object3DTag]);
@@ -20,6 +26,8 @@ let latestPointerPosition = {x: 0, y: 0}
 let latestPointerButton = 0
 let latestPointerEvent : "mousedown" | "mousemove" | "mouseup" | null = null
 let latestWheelDelta = 0.0
+
+const unprocessedEvents = new Array<Event>()
 
 let controlKeyPressed = false
 
@@ -96,6 +104,14 @@ function handlePointerEvent(e: PointerEvent, type: "mousedown" | "mousemove" | "
     latestPointerButton = e.button
 
     latestPointerEvent = type
+
+    const event = {
+        position: latestPointerPosition,
+        button: latestPointerButton,
+        type: latestPointerEvent
+    }
+
+    unprocessedEvents.push(event)
 }
 function handleWheelEvent(e: WheelEvent) {
     latestWheelDelta = e.deltaY
@@ -123,14 +139,14 @@ function processEvents(entityId: number, hyperbeamPlane: THREE.Mesh) {
     const hyperbeamPageWidth = HyperbeamPage.width[entityId]
     const hyperbeamPageHeight = HyperbeamPage.height[entityId]
 
-    let point
+    let point: THREE.Vector3 | null
     if ((point = getIntersectionPoint(hyperbeamPlane, camera)) != null) {
-        if(latestPointerEvent != null) {
+        for(const i in unprocessedEvents) {
             hyperbeamObject.hyperbeamEmbed.sendEvent({
-                type: latestPointerEvent,
+                type: unprocessedEvents[i].type,
                 x: point.x / hyperbeamPageWidth + 0.5,
                 y: -point.y / hyperbeamPageHeight + 0.5,
-                button: latestPointerButton
+                button: unprocessedEvents[i].button
             })
         }
 
@@ -155,6 +171,9 @@ function resetInputs() {
     latestWheelDelta = 0
     latestPointerButton = 0
     latestPointerEvent = null
+
+    while(unprocessedEvents.length > 0)
+        unprocessedEvents.pop()
 }
 
 export function HyperbeamPageSystem(world: HubsWorld) {
