@@ -93,6 +93,7 @@ import { linkedPDFSystem } from "../bit-systems/linked-pdf-system";
 import { inspectSystem } from "../bit-systems/inspect-system";
 import { snapMediaSystem } from "../bit-systems/snap-media-system";
 import { scaleWhenGrabbedSystem } from "../bit-systems/scale-when-grabbed-system";
+import { HyperbeamPageSystem } from "../bit-systems/hyperbeam-page-system";
 
 declare global {
   interface Window {
@@ -219,6 +220,9 @@ export function mainTick(xrFrame: XRFrame, renderer: WebGLRenderer, scene: Scene
   floatyObjectSystem(world);
 
   hoverableVisualsSystem(world);
+
+  // Custom systems
+  HyperbeamPageSystem(world)
 
   // We run this earlier in the frame so things have a chance to override properties run by animations
   hubsSystems.animationMixerSystem.tick(dt);

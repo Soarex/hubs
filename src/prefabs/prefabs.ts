@@ -1,8 +1,9 @@
 import { MediaLoaderParams } from "../inflators/media-loader";
-import { CameraPrefab, CubeMediaFramePrefab } from "../prefabs/camera-tool";
-import { MediaPrefab } from "../prefabs/media";
+import { CameraPrefab, CubeMediaFramePrefab } from "./camera-tool";
+import { MediaPrefab } from "./media";
 import { EntityDef } from "../utils/jsx-entity";
 import { DuckPrefab } from "./duck";
+import { HyperbeamPagePrefab } from "./hyperbeam-page-prefab";
 
 type CameraPrefabT = () => EntityDef;
 type CubeMediaPrefabT = () => EntityDef;
@@ -27,10 +28,11 @@ export type PrefabDefinition = {
   template: CameraPrefabT | CubeMediaPrefabT | MediaPrefabT;
 };
 
-export type PrefabName = "camera" | "cube" | "media" | "duck";
+export type PrefabName = "camera" | "cube" | "media" | "duck" | "hyperbeam-page";
 
 export const prefabs = new Map<PrefabName, PrefabDefinition>();
 prefabs.set("camera", { permission: "spawn_camera", template: CameraPrefab });
 prefabs.set("cube", { permission: "spawn_and_move_media", template: CubeMediaFramePrefab });
 prefabs.set("media", { permission: "spawn_and_move_media", template: MediaPrefab });
 prefabs.set("duck", { permission: "spawn_and_move_media", template: DuckPrefab });
+prefabs.set("hyperbeam-page", {permission: "spawn_and_move_media", template: HyperbeamPagePrefab } );

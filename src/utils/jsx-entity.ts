@@ -105,6 +105,7 @@ import { inflateObjectMenuTarget, ObjectMenuTargetParams } from "../inflators/ob
 import { inflateObjectMenuTransform, ObjectMenuTransformParams } from "../inflators/object-menu-transform";
 import { inflatePlane, PlaneParams } from "../inflators/plane";
 import { FollowInFovParams, inflateFollowInFov } from "../inflators/follow-in-fov";
+import { HyperbeamPageParams, inflateHyperbeamPage } from "../components/hyperbeam-page";
 
 preload(
   new Promise(resolve => {
@@ -308,6 +309,9 @@ export interface JSXComponentData extends ComponentData {
   destroyAtExtremeDistance?: true;
   quack?: true;
 
+  // Custom components
+  hyperbeamPage?: HyperbeamPageParams
+
   // @TODO Define all the anys
   networked?: any;
   textButton?: any;
@@ -497,7 +501,10 @@ const jsxInflators: Required<{ [K in keyof JSXComponentData]: InflatorFn }> = {
   link: inflateLink,
   objectMenuTransform: inflateObjectMenuTransform,
   objectMenuTarget: inflateObjectMenuTarget,
-  plane: inflatePlane
+  plane: inflatePlane,
+
+  // Custom inflators
+  hyperbeamPage: inflateHyperbeamPage
 };
 
 export const gltfInflators: Required<{ [K in keyof GLTFComponentData]: InflatorFn }> = {
